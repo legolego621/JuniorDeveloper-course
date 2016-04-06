@@ -1,0 +1,33 @@
+#include <iostream>
+using namespace std;
+int SearchMin(const int *massive,const size_t size, int min, size_t i)
+{
+	if(massive[i] < min)
+	min = massive[i];
+	if(i < size)
+	return SearchMin(massive,size, min, ++i);
+	else
+	return min;
+}
+int main(void)
+{
+	int size;
+	cout << "Enter count elements of massive: ";
+	cin >> size;
+	if(size > 0)
+	{
+		int *massive = new int [size];
+		for(size_t i = 0 ; i < size ; ++i)
+		{
+			cout << "Element [" << i << " ]: ";
+			cin >> massive[i];
+		}
+		int minimum = massive[0];
+		minimum = SearchMin(massive, size, minimum, 0);
+		cout << "Minimum = " << minimum << endl;
+		delete [] massive;
+	}
+	else
+	cout << "Error, count < 1 !" << endl;
+	return 0;
+}
