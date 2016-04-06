@@ -1,3 +1,4 @@
+//2. Реализовать вычисление n-го числа Фибоначчи с помощью переменных.
 #include <iostream>
 using namespace std;
 int main(void)
