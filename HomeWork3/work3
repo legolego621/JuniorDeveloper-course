@@ -1,0 +1,37 @@
+#include <iostream>
+using namespace std;
+void coupMassive(int *, size_t, size_t);
+int main(void)
+{
+	size_t size;
+	cout << "Enter count elements of massive: ";
+	cin >> size;
+	if(size > 0)
+	{
+		int *massive = new int [size];
+		cout << "Enter elements of massive: "<< endl;
+		for(size_t i = 0 ; i < size ; ++i)
+		{
+			cout << "Enelment [" << i << "]: ";
+			cin >> massive[i];
+		}
+		coupMassive(massive, size, 0);
+		cout << "Result massive: " << endl;
+		for(size_t i = 0 ; i < size ; ++i)
+		cout << "Element of massive[" << i << "] = " << massive[i] << endl;
+		delete [] massive;
+	}
+	else
+	cout << "Error: count elements of massive < 1" << endl;
+	return 0;
+}
+
+void coupMassive(int *massive, size_t size, size_t i)
+{
+	int temp = massive[i];
+	massive[i] = massive[size - 1 - i];
+	massive[size - 1 - i ] = temp;
+	++i;
+	if(i < size/2) coupMassive(massive, size, i);
+	else return;
+}
