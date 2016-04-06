@@ -1,0 +1,26 @@
+#include <iostream>
+using namespace std;
+int main(void)
+{
+	size_t size;
+	cout << "Enter element fibonacci: ";
+	cin >> size;
+	if(size > 0)
+	{
+		int vMinus1, vMinus2, resultValue;
+		if(size > 2)
+		{
+			vMinus1 = vMinus2 = 1;
+			for(size_t i = 2; i < size; ++i)
+			{
+				resultValue = vMinus1 + vMinus2;
+				vMinus2 = vMinus1;
+				vMinus1 = resultValue;
+			}
+		}
+		else
+		resultValue = 1;
+		cout << "result value: " << resultValue << endl;
+	}
+	return 0;
+}
