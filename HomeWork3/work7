@@ -1,0 +1,103 @@
+#include <iostream>
+#include <string>
+using namespace std;
+
+struct Student
+{
+	public:
+	string name;
+	int value;
+	void createName()
+	{
+		cout << "Name: ";
+		cin >> name;
+	}
+	void createValue()
+	{
+		cout << "Value: ";
+		cin >> value;
+	}
+	void pintInfo()
+	{
+		cout << "Name: " << name << endl;
+		cout << "Value: " << value << endl;
+	}
+};
+void inputBase(Student *studentsBase, const size_t count)
+{
+	for(int i = 0 ; i < count ; ++i)
+	{
+		cout << "\nStrudent [" << i << "]" << endl;
+		studentsBase[i].createName();
+		studentsBase[i].createValue();
+	}
+}
+float averageValueStudents(const Student *studentsBase, const size_t count)
+{
+	float average, summValue = 0;
+	for(size_t i = 0 ; i < count ; ++i)
+	{
+		summValue += studentsBase[i].value;
+	}
+    return average = summValue / float(count);
+}
+void betsStudentPrint(Student *studentsBase, const size_t count)
+{
+	size_t indexBestStudent = 0;
+	float valueBestStudent = studentsBase[0].value;
+	for(size_t i = 0 ; i < count ; ++i)
+	{
+		if(studentsBase[i].value > valueBestStudent)
+		{
+			valueBestStudent = studentsBase[i].value;
+			indexBestStudent = i;
+		}	
+	}
+	cout << "\nBest student\n";
+	studentsBase[indexBestStudent].pintInfo();
+}
+void worstStudentPrint(Student *studentsBase, const size_t count)
+{
+	size_t indexWorstStudent = 0;
+	float valueWorstStudent = studentsBase[0].value;
+	for(size_t i = 0 ; i < count ; ++i)
+	{
+		if(studentsBase[i].value < valueWorstStudent)
+		{
+			valueWorstStudent = studentsBase[i].value;
+			indexWorstStudent = i;
+		}	
+	}
+	cout << "\nWorst student\n";
+	studentsBase[indexWorstStudent].pintInfo();
+}
+void lowValuePrint(Student *studentsBase, const size_t count)
+{
+	float average = averageValueStudents(studentsBase, count);
+	cout << "\nLow Value of students: " << endl;
+	for(size_t i = 0 ; i < count ; ++i)
+	{
+		if(studentsBase[i].value < average)
+		studentsBase[i].pintInfo();
+	}
+}
+int main(void)
+{
+	int count;
+	float average;
+	cout << "Enter count of students: ";
+	cin >> count;
+	if(count > 0)
+	{
+		Student *studentsBase = new Student [count];
+		inputBase(studentsBase, count);
+		averageValueStudents(studentsBase, count);
+		betsStudentPrint(studentsBase, count);
+		worstStudentPrint(studentsBase, count);
+		lowValuePrint(studentsBase, count);
+		delete [] studentsBase;
+	}
+	else
+	cout << "Error. count < 1 !" << endl;
+	return 0;
+}
