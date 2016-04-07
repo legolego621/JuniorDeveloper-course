@@ -42,7 +42,7 @@ float averageValueStudents(const Student *studentsBase, const size_t count)
 	{
 		summValue += studentsBase[i].value;
 	}
-    return average = summValue / float(count);
+    return summValue / float(count);
 }
 void betsStudentPrint(Student *studentsBase, const size_t count)
 {
