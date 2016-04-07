@@ -1,0 +1,46 @@
+//5. Реализовать алгоритм поиска любой возрастающей подпоследовательности: 5 1 2 3 7 -2 3 5 -> 1 2 3 7
+//Программа ищет последнюю возрастающую последовательность в массиве
+#include <iostream>
+using namespace std;
+void searchResult(const int *massive,int *massiveResult, size_t size, int &n)
+{
+	n = 1;
+	massiveResult[0] = massive[0];
+	for(size_t i = 0; i < size; ++i)
+	{
+		if(massive[i] > massiveResult[n-1])
+		{
+			massiveResult[n] = massive[i];
+			++n;
+		}
+		else
+		{
+			massiveResult[0] = massive[i];
+			n = 1;
+		}
+	}
+}
+int main(void)
+{
+	size_t size;
+	cout << "Enter the count of elements array: ";
+	cin >> size;
+	if(size > 0)
+	{
+		int *massive = new int [size];
+		int n;
+		int *massiveResult = new int [size];
+		for(size_t i = 0 ; i < size ; ++i)
+		{
+			cout << "element [" << i << "]: ";
+			cin >> massive[i];
+		}
+		searchResult(massive, massiveResult, size, n);
+		cout << "Result: " << endl;
+		for(size_t i = 0; i < n; ++i)
+		cout << massiveResult[i] << " ";
+		delete [] massiveResult;
+		delete [] massive;
+	}
+	return 0;
+}
