@@ -1,46 +1,53 @@
 //5. Реализовать алгоритм поиска любой возрастающей подпоследовательности: 5 1 2 3 7 -2 3 5 -> 1 2 3 7
-//Программа ищет последнюю возрастающую последовательность в массиве
+//Программа ищет возрастающие последовательности в массиве, которые равняются минимальной длинне цифр(минимум вводит пользователь)
 #include <iostream>
 using namespace std;
-void searchResult(const int *massive,int *massiveResult, size_t size, int &n)
+void searchResult(const int *massive,int *massiveResult, const size_t size, const size_t nMin)
 {
-	n = 1;
+	int m2_size = 1;
 	massiveResult[0] = massive[0];
-	for(size_t i = 0; i < size; ++i)
+	for(size_t i = 0 ; i < size ; ++i)
 	{
-		if(massive[i] > massiveResult[n-1])
+		if(massive[i] > massiveResult[m2_size - 1])
 		{
-			massiveResult[n] = massive[i];
-			++n;
+			massiveResult[m2_size] = massive[i];
+			++m2_size;
 		}
 		else
 		{
+			if(m2_size >= nMin)
+			{
+				cout << "Result: ";
+				for(size_t j = 0 ; j < m2_size ; ++j)
+				cout << massiveResult[j] << " ";
+				cout << endl;
+			}
+			m2_size = 1;
 			massiveResult[0] = massive[i];
-			n = 1;
 		}
 	}
 }
 int main(void)
 {
-	size_t size;
+	size_t size, nMin;
 	cout << "Enter the count of elements array: ";
 	cin >> size;
-	if(size > 0)
+	cout << "Enter the  minimum  count the elements in result number: ";
+	cin >> nMin;
+	if(size > 0 && nMin <= size)
 	{
 		int *massive = new int [size];
-		int n;
 		int *massiveResult = new int [size];
 		for(size_t i = 0 ; i < size ; ++i)
 		{
 			cout << "element [" << i << "]: ";
 			cin >> massive[i];
 		}
-		searchResult(massive, massiveResult, size, n);
-		cout << "Result: " << endl;
-		for(size_t i = 0; i < n; ++i)
-		cout << massiveResult[i] << " ";
+		searchResult(massive, massiveResult, size, nMin);
 		delete [] massiveResult;
 		delete [] massive;
 	}
+	else
+	cout << "Error." << endl;
 	return 0;
 }
