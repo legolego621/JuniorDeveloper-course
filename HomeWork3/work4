@@ -1,33 +1,27 @@
+//4. Написать рекурсивную функцию по поиску минимальной цифры в числе.
 #include <iostream>
 using namespace std;
-int SearchMin(const int *massive,const size_t size, int min, size_t i)
+int SearchMin(int number, int min)
 {
-	if(massive[i] < min)
-	min = massive[i];
-	if(i < size)
-	return SearchMin(massive,size, min, ++i);
+	int num = number % 10;
+	number /= 10;
+	if(num < min)
+	min = num;
+	cout << "num: " << num << " min: " << min << " number: " << number << endl;
+	if(number)
+	return SearchMin(number, min);
 	else
 	return min;
 }
 int main(void)
 {
-	int size;
-	cout << "Enter count elements of massive: ";
-	cin >> size;
-	if(size > 0)
-	{
-		int *massive = new int [size];
-		for(size_t i = 0 ; i < size ; ++i)
-		{
-			cout << "Element [" << i << " ]: ";
-			cin >> massive[i];
-		}
-		int minimum = massive[0];
-		minimum = SearchMin(massive, size, minimum, 0);
-		cout << "Minimum = " << minimum << endl;
-		delete [] massive;
-	}
-	else
-	cout << "Error, count < 1 !" << endl;
+	int number;
+	cout << "Enter number: ";
+	cin >> number;
+	//Начальная инициализация для объявления минимума первой цифрой
+	int minimum = number % 10;
+	number /= 10;
+	minimum = SearchMin(number, minimum);
+	cout << "Result minimum: " << minimum << endl;
 	return 0;
 }
