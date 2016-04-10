@@ -1,0 +1,178 @@
+//Нужно реализовать методы:
+//erase (строка 54)
+//swap (строк 93)
+//shrink_to_fit (строка 72)
+//reserve (строка 107)
+//resize (строка 125)
+
+#include <iostream>
+using namespace std;
+class Vector
+{
+public:
+    Vector()
+    {
+        m_size = 0;
+        m_capacity = 1;
+        m_min = 1;
+        array = new int [m_capacity];
+    }
+    Vector(size_t size)
+    {
+        m_size = size;
+        m_capacity = 1 + m_size * 2;
+        m_min = 1;
+        array = new int [m_capacity];
+        for(size_t i = 0; i < m_size; ++i)
+            array[i] = 0;
+    }
+    ~Vector()
+    {
+        delete [] array;
+    }
+public:
+    //Добавляет значение в конец вектора
+    void insert(int value)
+    {
+        if((m_size + 1) > m_capacity)
+        {
+            m_capacity *= 2;
+            _increase(m_capacity);
+        }
+        ++m_size;
+        array[m_size - 1] = value;
+    }
+    print()
+    {
+        for(size_t i = 0; i < size(); ++i)
+           cout << array[i] << " ";
+        cout << endl;
+    }
+
+    //Удаляет содержимое вектора в заданном промежутке
+    int erase(size_t pos)
+    {
+        if(pos < 0)
+            return -1;
+        erase(pos, pos);
+    }
+    int erase(size_t first, size_t lost)
+    {
+        if(first <= lost && first >= 0 && lost > 0 && lost < m_size)
+        {
+            size_t delta = lost - first + 1;
+            m_size -= delta;
+            for(size_t i = first; i < m_size; i++)
+                array[i] = array[i + delta];
+        }
+        else return -1;
+    }
+    //Перераспределяет память вектора, если макмальное используемых элементов меньше 1/4 всего объема вектора
+    int shrink_to_fit()
+    {
+        cout << "H " << m_capacity << " ";
+        if(m_size < m_capacity / 4 && m_capacity / 2 > m_min)
+        {
+            if(m_size)
+            m_capacity = m_size * 2;
+            _increase(m_capacity);
+        }
+        cout << "E " << m_capacity << endl;
+    }
+    //Возвращает количество используемых элементов
+    int size()
+    {
+        return m_size;
+    }
+    void clear()
+    {
+        m_size = 0;
+    }
+    //Меняет элементы двух векторов местами
+    void swap(Vector &vec)
+    {
+        Vector * tempVector = new Vector;
+        for(size_t i = 0; i < vec.size() ; ++i)
+            tempVector->insert(vec[i]);
+        vec.clear();
+        for(size_t i = 0; i < size() ; ++i)
+            vec.insert(array[i]);
+        clear();
+        for(size_t i = 0; i < tempVector->size() ; ++i)
+            insert((*tempVector)[i]);
+        delete tempVector;
+    }
+    //Устанавливает минимальную длинну вектора
+    int reserve(size_t count)
+    {
+        m_min = count;
+        if(m_min > m_capacity)
+        {
+            int * tempArray = new int [m_capacity];
+            for(size_t i = 0; i < m_size ; ++i)
+                 tempArray[i] = array[i];
+            delete [] array;
+            m_capacity = m_min;
+            cout << "m_min = " << m_min << " m_size = " << m_size << " m_capacity = " << m_capacity << endl;
+            int * array = new int [m_capacity];
+            for(size_t i = 0 ; i < m_size ; ++i)
+                array[i] = tempArray[i];
+            delete [] tempArray;
+        }
+    }
+    //Изменение размера вектора
+    int resize(size_t count)
+    {
+        resize(count, 0);
+    }
+    int resize(size_t count, int value)
+    {
+        if(count > m_size)
+        {
+            for(size_t i = m_size; i < count; ++i)
+                insert(value);
+        }
+        else
+            m_size = count;
+        if(count < m_min)
+            m_min = count;
+    }
+
+private:
+    void _increase(size_t m_capacity)
+    {
+        m_capacity *= 2;
+        int * temp = new int [m_size];
+        for(size_t i = 0; i < m_size ; ++i)
+            temp[i] = array[i];
+        delete [] array;
+        array = new int [m_capacity];
+        for(size_t i = 0 ; i < m_size ; ++i)
+            array[i] = temp[i];
+        delete [] temp;
+    }
+public:
+    int operator[] (size_t index)
+    {
+        return array[index];
+    }
+private:
+    int * array;
+    size_t m_capacity;
+    size_t m_size;
+    size_t m_min;
+};
+
+int main(void)
+{
+    Vector v1;
+    for(size_t i = 0; i < 10; ++i)
+       v1.insert(i);
+    v1.reserve(100);
+    v1.shrink_to_fit();
+    v1.resize(150, 1);
+
+    v1.print();
+
+    return 0;
+}
