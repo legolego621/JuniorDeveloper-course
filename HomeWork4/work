@@ -74,7 +74,7 @@ public:
         if(m_size < m_capacity / 4 && m_capacity / 2 > m_min)
         {
             if(m_size)
-            m_capacity = m_size * 2;
+            m_capacity /= 2;
             _increase(m_capacity);
         }
         cout << "E " << m_capacity << endl;
