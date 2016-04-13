@@ -1,0 +1,185 @@
+//Создание двухсвзного списка
+//Функции:
+//(строка 47)   Добавление Элемента в конец                 
+//(строка 61)   Добавление элемента в любое местоположение  
+//(строка 92)   Вывод всего Списка                           
+//(строка 99)   Удаление н-го элемента листа 
+//(строка 106)  Удаление промежутка элементов 
+//(строка 133)  Сортировка методом пузырька + swap 
+
+
+#include <iostream>
+#include <string>
+using namespace std;
+
+template<class T>
+class Node
+{
+public:
+    Node()
+        : p_pred(nullptr), p_next(nullptr)
+    {}
+public:
+    Node <T> * Next()
+    {
+        return p_next;
+    }
+    Node <T> * Pred()
+    {
+        return p_pred;
+    }
+    T Data() const
+    {
+        return data;
+    }
+public:
+    T data;
+    Node <T> * p_pred;
+    Node <T> * p_next;
+};
+
+template<class T>
+class List
+{
+public:
+    List()
+        : m_size(0), p_head(nullptr), p_end(nullptr)
+    {}
+    ~List()
+    {
+        Node <T> * temp;
+        for(temp = p_head; temp; temp = temp->Next())
+        {
+            delete temp;
+        }
+    }
+public:
+    //Добавление Элемента в конец
+    void insert(T value)
+    {
+        Node <T> * New, * pPred;
+        New = new Node <T>;
+        if(p_head == nullptr)
+            p_head = p_end = New;
+        New->data = value;
+        pPred = p_end;
+        New->p_pred = pPred;
+        pPred->p_next = New;
+        p_end = New;
+        ++m_size;
+    }
+    //Добавление элемента в любое местоположение
+    void insert(T value, size_t index)
+    {
+        if(!(index >= 0 && index < m_size))
+            return;
+        Node <T> * New, * pPred, * pNext, * temp;
+        size_t i;
+        New = new Node <T>;
+        New->data = value;
+        if(m_size == 0)
+            p_head = p_end = New;
+        for(temp = p_head, i = 0; temp && i <= index; temp = temp->Next(), ++i)
+        {
+            if(i == index)
+            {
+                pPred = temp->Pred(); // На этом этапе прорамма вылетает
+                pNext = temp;
+                if(pPred != nullptr)
+                    pPred->p_next = New;
+                if(pNext != nullptr)
+                    pNext->p_pred = New;
+                New->p_pred = pPred;
+                New->p_next = pNext;
+                if(index == 0)
+                    p_head = New;
+                else if(index == m_size)
+                    p_end = New;
+            }
+        }
+        ++m_size;
+    }
+    //Вывод всего Листа
+    void print() const
+    {
+        for (Node <T> * temp = p_head; temp; temp = temp->Next())
+            cout << temp->Data() << " ";
+        cout << endl;
+    }
+    //Удаление н-го элемента листа
+    void del(size_t n)
+    {
+        if(!(n >= 0 && n < m_size))
+            return;
+        del(n, n);
+    }
+    //Удаление промежутка элементов
+    void del(size_t to, size_t from)
+    {
+        if(!(to >= 0 && to <= from && from < m_size))
+            return;
+        size_t i;
+        Node <T> * temp, * pPred, * pNext;
+        for (temp = p_head, i = 0; i <= from; temp = temp->Next(), ++i)
+        {
+            if(i >= to && i <= from)
+            {
+                if(i == to)
+                {
+                    pPred = temp->Pred();
+                }
+                if(i == from)
+                {
+                    pNext = temp->Next();
+                    pPred->p_next = pNext;
+                    if(pNext != nullptr)
+                    pNext->p_pred = pPred;
+                }
+                delete temp;
+                --m_size;
+            }
+        }
+    }
+    //Сортировка
+    void sort()
+    {
+        size_t i, j;
+        Node <T> * temp, * temp2;
+        for (temp = p_head, i = 0; i < m_size - 1; temp = temp->Next(), ++i)
+        {
+            bool flag = false;
+            for (temp2 = p_head, j = 0; j < m_size - i - 1; temp2 = temp2->Next(), ++j)
+            {
+                if(temp2->Data() > (temp2->Next())->Data())
+                {
+                    swap(temp2, temp2->Next());
+                    flag = true;
+                }
+            }
+            if(!flag)
+                break;
+        }
+    }
+private:
+    void swap(Node <T> * obj1, Node <T> * obj2)
+    {
+        T value;
+        value = obj1->Data();
+        obj1->data = obj2->Data();
+        obj2->data = value;
+    }
+private:
+    size_t m_size;
+    Node <T> * p_head;
+    Node <T> * p_end;
+};
+int main(void)
+{
+    List <int> list;
+    for(size_t i = 0; i < 10 ; ++i)
+    list.insert(i);
+    list.insert(100, 2);
+    list.sort();
+    list.print();
+    return 0;
+}
