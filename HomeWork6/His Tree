@@ -1,0 +1,108 @@
+#include <iostream>
+#include <string>
+#include <vector>
+#include <typeinfo>
+ 
+class TreeNode
+{
+public:
+    TreeNode(int value, TreeNode *left = nullptr, TreeNode *right = nullptr)
+        : m_value(value), m_left(left), m_right(right)
+    {}
+    TreeNode* left()
+    {
+        return m_left;
+    }
+    TreeNode* right()
+    {
+        return m_right;
+    }
+    int value() const
+    {
+        return m_value;
+    }
+    void setLeft(TreeNode *node)
+    {
+        m_left = node;
+    }
+    void setRight(TreeNode *node)
+    {
+        m_right = node;
+    }
+private:
+    int m_value;
+    TreeNode *m_left;
+    TreeNode *m_right;
+};
+ 
+class BinaryTree
+{
+public:
+    BinaryTree()
+    {
+        m_root = nullptr;
+    }
+    void insert(int value)
+    {
+        TreeNode *insertNode = new TreeNode(value);
+        if (m_root == nullptr)
+        {
+            m_root = insertNode;
+            return;
+        }
+        TreeNode *ptr = m_root;
+        while (ptr != nullptr)
+        {
+            if (ptr->value() > value)
+            {
+                if (ptr->left() == nullptr)
+                {
+                    ptr->setLeft(insertNode);
+                    return;
+                }
+                ptr = ptr->left();
+            }
+            else if (ptr->value() < value)
+            {
+                if (ptr->right() == nullptr)
+                {
+                    ptr->setRight(insertNode);
+                    return;
+                }
+                ptr = ptr->right();
+            }
+        }
+        ptr = insertNode;
+    }
+    void print() const
+    {
+        recursivePrint(m_root);
+    }
+private:
+    TreeNode *m_root;
+ 
+private:
+    void recursivePrint(TreeNode *ptr, int k = 1) const
+    {
+        if (ptr == nullptr)
+            return;
+        if (ptr->left())
+            recursivePrint(ptr->left(), k << 1);
+        for(size_t i = 0; i < k; ++i)
+            std::cout << "  ";
+        std::cout << ptr->value() << std::endl;
+        if (ptr->right())
+            recursivePrint(ptr->right(), k << 1);
+    }
+};
+ 
+int main()
+{
+    BinaryTree tree;
+    int arr[] = {5, 3, 8, 2, 4, 7, 9};
+    size_t size = sizeof(arr) / sizeof(*arr);
+    for(size_t i = 0; i < size; ++i)
+        tree.insert(arr[i]);
+    tree.print();
+    return 0;
+}
