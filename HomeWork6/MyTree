@@ -1,1 +1,168 @@
-//Tree
+#include <iostream>
+//Бинарное дерево:
+//Функция begin() строка 106
+//Функция lower_bound() строка 114
+//Функция upper_bound() строка 134
+using namespace std;
+template <class T>
+class Node
+{
+public:
+    Node(T Value)
+        : value(Value), left(nullptr), right(nullptr)
+    {}
+public:
+    Node <T> * Left() const
+    {
+        return left;
+    }
+    Node <T> * Right() const
+    {
+        return right;
+    }
+    T Value() const
+    {
+        return value;
+    }
+public:
+    void InsertLeft(Node <T> * New)
+    {
+        left = New;
+    }
+    void InsertRight(Node <T> * New)
+    {
+        right = New;
+    }
+private:
+    T value;
+    Node <T> * left;
+    Node <T> * right;
+};
+template <class T>
+class Tree
+{
+public:
+    Tree()
+        : m_size(0), m_root(nullptr)
+    {}
+public:
+    void insert(T newValue)
+    {
+        Node <T> * New = new Node <T> (newValue);
+        if(m_root == nullptr)
+        {
+            m_root = New;
+            ++m_size;
+            return;
+        }
+        Node <T> * ptr = m_root;
+        while(ptr)
+        {
+            if(ptr->Value() > newValue)
+            {
+                if(ptr->Left() == nullptr)
+                {
+                    ptr->InsertLeft(New);
+                    ++m_size;
+                    return;
+                }
+                else
+                    ptr = ptr->Left();
+            }
+            if(ptr->Value() <= newValue)
+            {
+                if(ptr->Right() == nullptr)
+                {
+                    ptr->InsertRight(New);
+                    ++m_size;
+                    return;
+                }
+                else
+                    ptr = ptr->Right();
+            }
+        }
+    }
+    void print() const
+    {
+        recursPrint(m_root);
+    }
+    size_t size() const
+    {
+        return m_size;
+    }
+private:
+    void recursPrint(Node <T> * ptr) const
+    {
+        cout << endl;
+        if(ptr == nullptr)
+            return;
+        if(ptr->Left())
+            recursPrint(ptr->Left());
+        cout << ptr->Value() << endl;
+        if(ptr->Right())
+            recursPrint(ptr->Right());
+    }
+public:
+    Node <T> * begin() const
+    {
+        return m_root;
+    }
+    Node <T> * end() const
+    {
+
+    }
+    Node <T> * lower_bound(const T &key) const
+    {
+        if(m_root == nullptr)
+            return nullptr;
+        Node <T> * ptr = m_root;
+        while(ptr)
+        {
+            if(ptr->Value() > key)
+            {
+                ptr = ptr->Left();
+            }
+            if(ptr->Value() <= key)
+            {
+                if(ptr->Value() == key)
+                    return ptr;
+                else
+                    ptr = ptr->Right();
+            }
+        }
+    }
+    Node <T> * upper_bound(const T &key) const
+    {
+        if(m_root == nullptr)
+            return nullptr;
+        Node <T> * ptr = m_root;
+        while(ptr)
+        {
+            if(ptr->Value() > key)
+                ptr = ptr->Left();
+            if(ptr->Value() <= key)
+            {
+                if(ptr->Value() == key && ((ptr->Right())->Value() > key))
+                        return ptr->Right();
+                ptr = ptr->Right();
+            }
+        }
+    }
+private:
+    Node <T> * m_root;
+    size_t m_size;
+};
+
+int main(void)
+{
+    Tree <int> test;
+    Node <int> * ptrTest;
+    test.insert(1);
+    test.insert(2);
+    test.insert(3);
+    test.insert(4);
+    ptrTest = test.lower_bound(1); // Адрес корня, значения 1
+    ptrTest = test.upper_bound(1); // Адрес значения 2
+    test.print();
+    return 0;
+}
