@@ -107,14 +107,13 @@ public:
     {
         if(m_root == nullptr)
             return nullptr;
-        Node <T> * ptr = m_root, * begin = m_root;
+        Node <T> * ptr = m_root;
         while(ptr)
         {
-            if(ptr->Left() != nullptr)
-                begin = ptr->Left();
+            if(ptr->Left() == nullptr)
+                return ptr;
                 ptr = ptr->Left();
         }
-        return begin;
     }
     Node <T> * end() const
     {
