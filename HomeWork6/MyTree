@@ -1,8 +1,8 @@
-#include <iostream>
 //Бинарное дерево:
 //Функция begin() строка 106
 //Функция lower_bound() строка 114
 //Функция upper_bound() строка 134
+#include <iostream>
 using namespace std;
 template <class T>
 class Node
@@ -105,11 +105,29 @@ private:
 public:
     Node <T> * begin() const
     {
-        return m_root;
+        if(m_root == nullptr)
+            return nullptr;
+        Node <T> * ptr = m_root, * begin = m_root;
+        while(ptr)
+        {
+            if(ptr->Left() != nullptr)
+                begin = ptr->Left();
+                ptr = ptr->Left();
+        }
+        return begin;
     }
     Node <T> * end() const
     {
-
+        if(m_root == nullptr)
+            return nullptr;
+        Node <T> * ptr = m_root, * end = m_root;
+        while(ptr)
+        {
+            if(ptr->Right() != nullptr)
+                end = ptr->Right();
+                ptr = ptr->Right();
+        }
+        return end;
     }
     Node <T> * lower_bound(const T &key) const
     {
@@ -157,12 +175,16 @@ int main(void)
 {
     Tree <int> test;
     Node <int> * ptrTest;
-    test.insert(1);
+    test.insert(17);
     test.insert(2);
-    test.insert(3);
-    test.insert(4);
+    test.insert(34);
+    test.insert(14);
     ptrTest = test.lower_bound(1); // Адрес корня, значения 1
     ptrTest = test.upper_bound(1); // Адрес значения 2
+    ptrTest = test.end();
+    cout << "Result end: " << ptrTest->Value() << endl;
+    ptrTest = test.begin();
+    cout << "Result begin: " << ptrTest->Value() << endl;
     test.print();
     return 0;
 }
