@@ -1,0 +1,65 @@
+//1. Для каждого диапазона чисел из массива посчитать, сколько элементов из этого же массива находится в текущем диапазоне.
+//Например:
+//Массив: 1 2 3 4 5 6 7 8 9
+//Один из диапазонов (2, 7). Количество элементов в массиве, которые выходят в данный диапазон - 4. Это числа: 3, 4, 5, 6
+//И так для каждой пары чисел.
+#include <iostream>
+#include <fstream>
+#include <cstdio>
+#include <ctime>
+void inputArr(int * arr, size_t size);
+void findCount(int * arr, size_t size);
+using namespace std;
+int main(void)
+{
+    size_t size;
+    cout << "Enter size: ";
+    cin >> size;
+    int * arr = new int [size];
+    inputArr(arr, size);
+    findCount(arr, size);
+    delete [] arr;
+    return 0;
+}
+
+void inputArr(int * arr, size_t size)
+{
+    cout << "INPUT ARRAY" << endl;
+    srand(time(0));
+    for(size_t i = 0; i < size; ++i)
+    {
+        arr[i] = rand()%200 - 100;
+        cout << "Element [" << i << "] = " << arr[i] << endl;
+    }
+}
+
+void findCount(int * arr, size_t size)
+{
+    cout << "ANALIZE" << endl;
+    int from, to, count;
+    for(size_t i = 0; i < size - 1; ++i)
+    {
+        from = arr[i];
+        for(size_t j = i + 1; j < size; ++j)
+        {
+            to = arr[j];
+            count = 0;
+            if(from > to)
+            {
+                int temp = to;
+                to = from;
+                from = temp;
+            }
+            cout << "Interval [" << from << " : " << to << "] = ";
+            for(size_t f = 0; f < size; ++f)
+            {
+                if(arr[f] > from && arr[f] < to)
+                {
+                    cout << arr[f] << " ";
+                    ++count;
+                }
+            }
+            cout << "\t\t(" << count << ")" << endl;
+        }
+    }
+}
