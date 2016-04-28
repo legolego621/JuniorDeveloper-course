@@ -1,0 +1,496 @@
+#include <iostream>
+#include <fstream>
+#include <map>
+#include <list>
+#include <vector>
+#include <string>
+#include <cstring>
+using namespace std;
+//Класс ячеек дерева
+class Node
+{
+public:
+    Node()
+        : left(nullptr), right(nullptr)
+    {}
+    Node(Node * LeftNode, Node * RightNode)
+        : left(LeftNode), right(RightNode), number(LeftNode->number + RightNode->number)
+    {}
+public:
+    int number;
+    char value;
+    Node * left, * right;
+};
+class HuffmanCoding
+{
+public:
+    HuffmanCoding()
+    {
+        H_weight = new map<char, int>;
+        H_nodeList = new list<Node *>;
+        H_code = new vector <bool>;
+        H_table = new map<char, vector<bool> >;
+        H_resultBinCode = new vector<bool>;
+    }
+    ~HuffmanCoding()
+    {
+        delete H_weight;
+        delete H_nodeList;
+        delete H_code;
+        delete H_table;
+        delete H_resultBinCode;
+    }
+public:
+    void coding(ifstream &inFile)
+    {
+        createWeight(inFile);
+//        printWeight();
+        createListNode();
+        createTree();
+        createTable(H_root);
+//        printTable();
+    }
+    int saveCodFile(ifstream &inFile, ofstream &outFile)
+    {
+        return saveCodingFile(inFile, outFile);
+    }
+    int decoding(ifstream &inFile_encoded, ofstream &outFile_decoded)
+    {
+        return decodingEncodeFile(inFile_encoded, outFile_decoded);
+    }
+    void saveKeyFile(ofstream &Key)
+    {
+        _saveKeyFile(Key);
+    }
+    void openKeyFile(ifstream &Key)
+    {
+        _openKeyFile(Key);
+    }
+
+private:
+    //Получение количества встречаемых сомволов в файле
+    void createWeight(ifstream &inFile)
+    {
+        char ch;
+        while(!inFile.eof())
+        {
+            inFile.read((char *) &ch, sizeof ch);
+            ++(*H_weight)[ch];
+        }
+    }
+    //Вывод весов
+    void printWeight()
+    {
+        map<char, int>::iterator itrWeight;
+        for(itrWeight = H_weight->begin(); itrWeight != H_weight->end(); itrWeight++)
+            cout << itrWeight->second << " : " << itrWeight->first << endl;
+    }
+    //Создание листа ячеяк
+    void createListNode()
+    {
+        map<char, int>::iterator itrWeight;
+        for (itrWeight = H_weight->begin(); itrWeight != H_weight->end(); ++itrWeight)
+        {
+            //Создание новых узлов
+            Node * newNode = new Node;
+            newNode->value = itrWeight->first;
+            newNode->number = itrWeight->second;
+            H_nodeList->push_back(newNode);
+        }
+    }
+
+    //Создание дерева
+    void createTree()
+    {
+        while(H_nodeList->size() != 1)
+        {
+            //Сортировка
+            H_nodeList->sort(compare());
+            //удаление первых элементов списка
+            Node * SonL = H_nodeList->front();
+            H_nodeList->pop_front();
+            Node * SonR = H_nodeList->front();
+            H_nodeList->pop_front();
+            //На основе удаленных создаю отца
+            Node * Parent = new Node(SonL, SonR);
+            H_nodeList->push_back(Parent);
+        }
+        //Корень дерева
+        H_root = H_nodeList->front();
+    }
+    //Создание таблицы: символ - код
+    void createTable(Node * Root)
+    {
+        if(Root->left != nullptr)
+        {
+            H_code->push_back(0);
+            createTable(Root->left);
+        }
+        if(Root->right != nullptr)
+        {
+            H_code->push_back(1);
+            createTable(Root->right);
+        }
+        if(Root->left == nullptr && Root->right == nullptr)
+        {
+            (*H_table)[Root->value] = (*H_code); //ПРОБЛЕМА ВЕРОЯТНЕЕ ТУТ!
+        }
+        H_code->pop_back();
+    }
+    // ПРОБЛЕМА В НЕКОРРЕКТНОМ ВЫВОДЕ ПРОБЕЛА ОБНАРУЖАЕТСФЯ ТУТ. ПРИ ВЫВОДЕ ТАБЛИЦЫ НЕ НАЙДЕН КЛЮЧ К ПРОБЕЛУ
+    void printTable()
+    {
+        vector<bool> * BufferBinCode = new vector<bool>;
+        map<char, vector<bool> >::iterator itr;
+        for(itr = H_table->begin(); itr != H_table->end(); ++itr)
+        {
+            char ch = itr->first;
+            if(ch == ' ') cout << "space";
+            cout << itr->first << " : " ;
+            (*BufferBinCode) = (*H_table)[ch];
+            for(size_t n = 0; n < BufferBinCode->size(); ++n)
+            {
+                cout << (*BufferBinCode)[n];
+            }
+            cout << endl;
+        }
+        delete BufferBinCode;
+    }
+
+    //Сохранение готового закодированного файла
+    int saveCodingFile(ifstream &inFile, ofstream &newCodingFile)
+    {
+        vector<bool> * BufferBinCode = new vector<bool>;
+        size_t count = 0;
+        char ch, buf = 0;
+        inFile.clear();
+        inFile.seekg(0);
+        while(!inFile.eof())
+        {
+            inFile.read((char *) &ch, sizeof ch);
+            (*BufferBinCode) = (*H_table)[ch];
+            for(size_t n = 0; n < BufferBinCode->size(); ++n)
+            {
+                buf = buf | (*BufferBinCode)[n] << (7 - count);
+                ++count;
+                if(count == 8)
+                {
+                    count = 0;
+                    newCodingFile.write((char *) &buf, sizeof buf);
+                    buf = 0;
+                }
+            }
+        }
+        delete BufferBinCode;
+        return 1;
+    }
+    //Сохранение ключа
+    void _saveKeyFile(ofstream &Key) const
+    {
+        map<char, vector<bool> >::iterator itr;
+        for(itr = H_table->begin(); itr != H_table->end(); ++itr)
+        {
+            structKey keyBuff;
+            vector<bool> code = itr->second;
+            char byte[2] = "";
+            for(size_t i = 0; i < code.size(); ++i)
+            {
+                byte[0] = code[i] ? '1' : '0';
+                strcat(keyBuff.code, byte);
+            }
+            keyBuff.ch = itr->first;
+            Key.write((char *) &(keyBuff), sizeof(keyBuff));
+            strcpy(keyBuff.code, "");
+        }
+    }
+    //открытие ключа
+//    void _openKeyFile(ifstream &Key)
+//    {
+//        struct structKey
+//        {
+//            char ch;
+//            char code[100];
+//        };
+//        map<char, vector<bool> >::iterator itr;
+//        structKey keyBuff;
+//        Key.clear();
+//        Key.seekg(0);
+//        Key.read((char *) &(keyBuff), sizeof(structKey));
+//        while(!Key.eof())
+//        {
+//            cout << keyBuff.ch << " : " << keyBuff.code;
+//            for(size_t i = 0; i < strlen(keyBuff.code); ++i)
+//                cout << int((keyBuff.code)[i]);
+//            cout << endl;
+//            Key.read((char *) &(keyBuff), sizeof(structKey));
+//        }
+//    }
+    void _openKeyFile(ifstream &Key)
+    {
+        H_table->clear();
+        structKey keyBuff;
+        Key.read((char *) &(keyBuff), sizeof(structKey));
+        while(!Key.eof())
+        {
+            vector<bool> codeBuff;
+            //cout << "len = " << strlen(keyBuff.code) << endl;
+            for(size_t j = 0; j < strlen(keyBuff.code); j++)
+            {
+                bool byte;
+                if((keyBuff.code)[j] == '1')
+                    byte = true;
+                else if((keyBuff.code)[j] == '0')
+                    byte = false;
+                codeBuff.push_back(byte);
+            }
+            char ch = keyBuff.ch;
+            (*H_table)[ch] = codeBuff;
+            Key.read((char *) &(keyBuff), sizeof(structKey));
+        }
+        // Проверка
+        map<char, vector<bool> >::iterator itr;
+        for(itr = H_table->begin(); itr != H_table->end(); ++itr)
+        {
+            cout << itr->first << " ";
+            for(size_t n = 0; n < (itr->second).size(); ++n)
+                cout << (itr->second)[n];
+            cout << endl;
+        }
+    }
+//    void _openKeyFile(ifstream &Key)
+//    {
+//        H_table->clear();
+//        structKey keyBuff;
+//        map<char, vector<bool> > inKey;
+//        Key.read((char *) &(keyBuff), sizeof(structKey));
+//        while(!Key.eof())
+//        {
+//            vector<bool> codeBuff;
+//            char ch = keyBuff.ch;
+//            for(size_t j = 0; j < strlen(keyBuff.code); j++)
+//            {
+//                bool byte;
+//                if((keyBuff.code)[j] == '1')
+//                    byte = true;
+//                else if((keyBuff.code)[j] == '0')
+//                    byte = false;
+//                codeBuff.push_back(byte);
+//            }
+//            inKey[ch] = codeBuff;
+//            Key.read((char *) &(keyBuff), sizeof(structKey));
+//        }
+//    }
+private:
+    //Декодирование зашифрованного файла
+    int decodingEncodeFile(ifstream &inFile_encoded, ofstream &outFile_decoded)
+    {
+        Node * ptr = H_root;
+        size_t count = 0;
+        char byte = inFile_encoded.get();
+        while(!inFile_encoded.eof())
+        {
+            bool buf = byte & (1 << (7 - count));
+            if(buf)
+                ptr = ptr->right;
+            else
+                ptr = ptr->left;
+            if(ptr->left == nullptr && ptr->right == nullptr)
+            {
+                outFile_decoded.write((char *) &ptr->value, sizeof ptr->value);
+                ptr = H_root;
+            }
+            ++count;
+            if(count == 8)
+            {
+                count = 0;
+                byte = inFile_encoded.get();
+            }
+        }
+        return 1;
+    }
+private:
+    //Структура для сравнения ячеек при сортировке
+    struct compare
+    {
+        bool operator() (Node * left, Node * right) const
+        {
+            return left->number < right->number;
+        }
+    };
+    //Структурка для записи чтения ключа из файла
+    struct structKey
+    {
+        char ch;
+        char code[100];
+    };
+private:
+    map<char, int> * H_weight;
+    list <Node *> * H_nodeList;
+    vector <bool> * H_code;
+    map<char, vector<bool> > * H_table;
+    vector<bool> * H_resultBinCode;
+    Node * H_root;
+};
+
+//Управляющий класс алгоритмом и другими вещами
+class CryptoAlgorithm
+{
+public:
+    CryptoAlgorithm()
+        : Algorithm(nullptr), flagOpenFile(false), flagSaveFileCoding(false), flagSaveFileDecoding(false), flagCodingFile(false), flagDegodingFile(false)
+    {
+        Algorithm = new HuffmanCoding;
+    }
+
+    CryptoAlgorithm(char * nameFile)
+        : nameFile(nameFile), Algorithm(nullptr), flagOpenFile(false), flagSaveFileCoding(false), flagSaveFileDecoding(false), flagCodingFile(false), flagDegodingFile(false)
+    {
+        openFile(nameFile);
+        Algorithm = new HuffmanCoding;
+    }
+    ~CryptoAlgorithm()
+    {}
+public:
+    //Открытие файла
+    void openFile(char * nameFileOpen)
+    {
+        if(flagOpenFile)
+            return;
+        inFile.open(nameFileOpen, ios::binary | ios::in);
+        if(!inFile.is_open())
+        {
+            cout << "File open( " << nameFileOpen << " ): Error" << endl;
+            return;
+        }
+        cout << "File open( " << nameFileOpen << " ): OK" << endl;
+        flagOpenFile = true;
+    }
+    //Кодирование файла
+    void codingFile()
+    {
+        if(!flagOpenFile)
+        {
+            cout << "File not open: EXIT" << endl;
+            return;
+        }
+        Algorithm->coding(inFile);
+        flagSaveFileCoding = true;
+    }
+   //Сохранение готового кодированного файла
+    void saveCodingFile(const char * nameCodingFile)
+    {
+        if(!flagSaveFileCoding)
+        {
+            cout << "File not coding: ERROR " << endl;
+            return;
+        }
+        outFile.open(nameCodingFile, ios::binary | ios::out);
+        if(!outFile.is_open())
+        {
+            cout << "Error open file coding! " << endl;
+            return;
+        }
+        if(Algorithm->saveCodFile(inFile, outFile))
+        {
+            outFile.close();
+            flagSaveFileCoding = true;
+            cout << "Save file coding: OK" << endl;
+        }
+    }
+    //Сохранение уже готового сгенерированного ключа
+    void saveKey(const char * NameFileKey)
+    {
+        if(!flagSaveFileCoding)
+        {
+            cout << "File is not encoded! "<< endl;
+            return;
+        }
+        ofstream Key(NameFileKey, ios::out | ios::binary);
+        if(!Key.is_open())
+        {
+            cout << "Key file is not open" << endl;
+            return;
+        }
+        Algorithm->saveKeyFile(Key);
+        cout << "Save key file..." << endl;
+        Key.close();
+    }
+    void openKey(const char * NameFileKey)
+    {
+        if(!flagOpenFile)
+        {
+            cout << "Input File is not open! "<< endl;
+            return;
+        }
+        ifstream Key(NameFileKey, ios::binary | ios::in);
+        if(!Key.is_open())
+        {
+            cout << "Error opening key file!" << endl;
+            return;
+        }
+        Algorithm->openKeyFile(Key);
+        Key.close();
+        cout << "Key file open" << endl;
+    }
+
+    void decodingFile(const char * nameDecodingFile)
+    {
+        if(!flagOpenFile)
+        {
+            cout << "File not open! ERROR!" << endl;
+            return;
+        }
+        outFile.open(nameDecodingFile, ios::binary | ios::out);
+        if(!outFile.is_open())
+        {
+            cout << "Error open file decoding! " << endl;
+            return;
+        }
+        if(Algorithm->decoding(inFile, outFile));
+        {
+            outFile.close();
+            flagDegodingFile = true;
+            cout << "Save file decoding: OK" << endl;
+        }
+    }
+    void closeInFile()
+    {
+        if(!flagOpenFile)
+        {
+            cout << "Error close file. He is not open!" << endl;
+            return;
+        }
+        inFile.close();
+        flagOpenFile = false;
+        cout << "Input Filse Close!" << endl;
+    }
+
+private:
+    char * nameFile;
+    bool flagOpenFile, flagSaveFileCoding, flagSaveFileDecoding, flagCodingFile, flagDegodingFile /* <- Под вопросом, нужна ли данная переменная */;
+    HuffmanCoding * Algorithm;
+    ifstream inFile;
+    ofstream outFile;
+};
+int main(void)
+{
+    char nameFile[] = "E:/testingHuffman/1.txt";
+    char CodeFile[] = "E:/testingHuffman/2.txt";
+    char deCodeFile[] = "E:/testingHuffman/3.txt";
+    char nameKeyFile[] = "E:/testingHuffman/key.txt";
+    cout << "Name file: " << nameFile << endl;
+//    CryptoAlgorithm file(nameFile);
+    CryptoAlgorithm file;
+    file.openFile(nameFile);
+    file.codingFile();
+    system("pause");
+    file.saveCodingFile(CodeFile);
+    file.saveKey(nameKeyFile);
+    file.closeInFile();
+    system("pause");
+    file.openFile(CodeFile);
+    file.openKey(nameKeyFile);
+//    file.decodingFile(deCodeFile);
+//    file.closeInFile();
+    return 0;
+}
